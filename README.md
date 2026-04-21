@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
 
-# 🖥️ PC Remote Bot
+# 🖥️ SysTracker
 
 ### Telegram-Based Remote PC Control System
 
@@ -20,7 +20,7 @@ Supports **multiple PCs** simultaneously with seamless switching.
 
 ## 📌 Overview
 
-PC Remote Bot is a lightweight remote access tool that uses the **Telegram Bot API** as a communication channel. No port forwarding, no VPN, no dedicated server required. Just run the script on your PC and control it from anywhere.
+SysTracker is a lightweight remote access tool that uses the **Telegram Bot API** as a communication channel. No port forwarding, no VPN, no dedicated server required. Just run the script on your PC and control it from anywhere.
 
 ```
 Your Phone (Telegram)
@@ -64,8 +64,8 @@ Your Phone (Telegram)
 
 **Step 1 — Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/pc-remote-bot.git
-cd pc-remote-bot
+git clone https://github.com/yourusername/SysTracker.git
+cd SysTracker
 ```
 
 **Step 2 — Install dependencies:**
@@ -235,7 +235,7 @@ Step 4: Tap ⬅️ Back to switch PCs
 ## 📁 Project Structure
 
 ```
-pc-remote-bot/
+SysTracker/
 │
 ├── tracker.py          # Main bot script
 ├── build.bat           # Build exe using PyInstaller
