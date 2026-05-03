@@ -201,7 +201,6 @@ def is_admin():
 def get_exe_name():
     """Get correct exe name - works with --name flag"""
     if getattr(sys, 'frozen', False):
-        # ✅ Running as exe - always use actual exe filename
         return os.path.basename(sys.executable)
     else:
         # ✅ Running as script
@@ -1526,11 +1525,11 @@ elif args.platform == "discord":
 elif args.platform == "both":
     print("  Starting both Telegram + Discord...")
 
-    # ✅ Telegram in background thread
+    # Telegram in background thread
     tg_thread = threading.Thread(target=run_telegram_thread, daemon=False)
     tg_thread.start()
 
-    # ✅ Discord in main thread with proper event loop
+    # Discord in main thread with proper event loop
     while True:
         try:
             if sys.platform == "win32":

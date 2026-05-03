@@ -23,7 +23,6 @@ yarn-error.log*
 # ========================
 # 🏗️ Build / Dist
 # ========================
-dist/
 build/
 out/
 
